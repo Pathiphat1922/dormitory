@@ -143,6 +143,7 @@ export default function DormitoryManagement() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
 
   // ข้อมูลห้องพัก 10 ห้อง
   const rooms: Room[] = [
@@ -164,6 +165,10 @@ export default function DormitoryManagement() {
     { label: 'ผู้เช่า', value: '7', icon: 'Users', color: 'bg-purple-500', change: '+12%' },
     { label: 'รายได้เดือนนี้', value: '22,400', icon: 'DollarSign', color: 'bg-yellow-500', change: '+8%' },
   ];
+
+  // คำนวณยอดค้างชำระทั้งหมด
+  const totalOutstanding = rooms.reduce((sum, room) => sum + room.outstandingBalance, 0);
+  const overdueRooms = rooms.filter(room => room.paymentStatus === 'overdue').length;
 
   const recentActivities = [
     { action: 'ห้อง A101 ชำระค่าเช่าแล้ว', time: '5 นาทีที่แล้ว', type: 'payment' },
@@ -312,6 +317,37 @@ export default function DormitoryManagement() {
         <main className="flex-1 p-6 lg:p-8">
           {!selectedRoom ? (
             <>
+              {/* Outstanding Balance Alert - โดดเด่นที่สุด */}
+              {totalOutstanding > 0 && (
+                <div className="mb-6 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl p-6 sm:p-8 text-white shadow-2xl border-4 border-red-300">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white bg-opacity-20 backdrop-blur rounded-2xl flex items-center justify-center flex-shrink-0">
+                      <Icons.AlertCircle />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-xl sm:text-2xl font-bold">⚠️ แจ้งเตือนยอดค้างชำระ</h2>
+                      </div>
+                      <p className="text-red-100 text-sm sm:text-base mb-4">มีห้องที่ค้างชำระเงินทั้งหมด {overdueRooms} ห้อง</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
+                        <div>
+                          <p className="text-red-100 text-xs sm:text-sm mb-1">ยอดค้างชำระทั้งหมด</p>
+                          <p className="text-4xl sm:text-5xl font-black">
+                            ฿{totalOutstanding.toLocaleString()}
+                          </p>
+                        </div>
+                        <button 
+                          onClick={() => setShowOutstandingOnly(!showOutstandingOnly)}
+                          className="bg-white text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-50 transition-all transform hover:scale-105 shadow-lg"
+                        >
+                          {showOutstandingOnly ? 'แสดงทั้งหมด' : 'ดูรายละเอียด →'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, idx) => (
@@ -337,8 +373,15 @@ export default function DormitoryManagement() {
                 <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200">
                   <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
                     <div>
-                      <h2 className="text-base sm:text-lg font-bold text-gray-900">รายการห้องพัก</h2>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1">คลิกเพื่อดูรายละเอียด</p>
+                      <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                        {showOutstandingOnly ? 'ห้องที่ค้างชำระ' : 'รายการห้องพัก'}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        {showOutstandingOnly 
+                          ? `แสดงห้องที่มียอดค้างชำระ ${rooms.filter(r => r.outstandingBalance > 0).length} ห้อง`
+                          : 'คลิกเพื่อดูรายละเอียด'
+                        }
+                      </p>
                     </div>
                     <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
                       <Icons.Plus />
@@ -355,15 +398,18 @@ export default function DormitoryManagement() {
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">สถานะ</th>
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ผู้เช่า</th>
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ค่าเช่า</th>
+                          {showOutstandingOnly && (
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ค้างชำระ</th>
+                          )}
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">การชำระ</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {rooms.map((room) => (
+                        {(showOutstandingOnly ? rooms.filter(r => r.outstandingBalance > 0) : rooms).map((room) => (
                           <tr 
                             key={room.id} 
                             onClick={() => handleRoomClick(room)}
-                            className={`transition-colors ${room.status !== 'vacant' ? 'hover:bg-blue-50 cursor-pointer' : 'opacity-60'}`}
+                            className={`transition-colors ${room.status !== 'vacant' ? 'hover:bg-blue-50 cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-50' : ''}`}
                           >
                             <td className="px-6 py-4">
                               <span className="font-semibold text-gray-900">{room.id}</span>
@@ -373,6 +419,11 @@ export default function DormitoryManagement() {
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-700">{room.tenant}</td>
                             <td className="px-6 py-4 text-sm font-medium text-gray-900">฿{room.price.toLocaleString()}</td>
+                            {showOutstandingOnly && (
+                              <td className="px-6 py-4">
+                                <span className="text-sm font-bold text-red-600">฿{room.outstandingBalance.toLocaleString()}</span>
+                              </td>
+                            )}
                             <td className="px-6 py-4">
                               {room.status === 'occupied' && getPaymentStatusBadge(room.paymentStatus)}
                               {room.status !== 'occupied' && <span className="text-xs text-gray-400">-</span>}
@@ -385,11 +436,11 @@ export default function DormitoryManagement() {
 
                   {/* Mobile Card View */}
                   <div className="md:hidden divide-y divide-gray-200">
-                    {rooms.map((room) => (
+                    {(showOutstandingOnly ? rooms.filter(r => r.outstandingBalance > 0) : rooms).map((room) => (
                       <div
                         key={room.id}
                         onClick={() => handleRoomClick(room)}
-                        className={`p-4 transition-colors ${room.status !== 'vacant' ? 'active:bg-blue-50 cursor-pointer' : 'opacity-60'}`}
+                        className={`p-4 transition-colors ${room.status !== 'vacant' ? 'active:bg-blue-50 cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-50' : ''}`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div>
@@ -403,6 +454,12 @@ export default function DormitoryManagement() {
                           <div>
                             <p className="text-xs text-gray-500 mb-1">ค่าเช่า</p>
                             <p className="text-base font-semibold text-gray-900">฿{room.price.toLocaleString()}</p>
+                            {showOutstandingOnly && room.outstandingBalance > 0 && (
+                              <>
+                                <p className="text-xs text-red-600 mt-2">ค้างชำระ</p>
+                                <p className="text-base font-bold text-red-600">฿{room.outstandingBalance.toLocaleString()}</p>
+                              </>
+                            )}
                           </div>
                           {room.status === 'occupied' && (
                             <div className="text-right">
