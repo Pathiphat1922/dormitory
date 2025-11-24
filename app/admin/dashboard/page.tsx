@@ -81,7 +81,8 @@ export default function AdminDashboard() {
   const handleSaveRoom = () => {
     if (!editingRoom) return;
     setRooms(rooms.map(r => r.id === editingRoom.id ? editingRoom : r));
-    setEditingRoom(null);
+    setEditingRoom(null); // ปิด Modal แล้วจะเห็นหน้าหลักอัปเดตทันที
+    // สามารถเพิ่ม alert('บันทึกสำเร็จ'); ตรงนี้ได้ถ้าต้องการ
   };
 
   const handleDeleteRoom = (id: string) => {
@@ -94,7 +95,7 @@ export default function AdminDashboard() {
     if (editingRoom) setEditingRoom({ ...editingRoom, [field]: value });
   };
 
-  // --- QR Code Logic (หัวใจสำคัญ) ---
+  // --- QR Code Logic (Thai Logic) ---
   const openVerificationModal = (invoice: Invoice) => {
     setVerifyingInvoice(invoice);
     setVerificationStep('idle');
@@ -108,11 +109,6 @@ export default function AdminDashboard() {
     setTimeout(() => {
       if (!verifyingInvoice) return;
 
-      // --- Simulation Logic ---
-      // สุ่มเหตุการณ์: 
-      // 70% = ยอดตรงเป๊ะ (ผ่าน)
-      // 20% = ยอดไม่ตรง (ไม่ผ่าน)
-      // 10% = สลิปปลอม/QR เสีย (ไม่ผ่าน)
       const randomScenario = Math.random();
       
       let result;
@@ -131,7 +127,7 @@ export default function AdminDashboard() {
         result = { success: false, message: `ยอดเงินไม่ตรง! (สแกนได้: ${wrongAmount})`, scannedAmount: wrongAmount };
       } else {
         // Case: สลิปปลอม / ไม่พบข้อมูล
-        result = { success: false, message: 'ไม่พบข้อมูลการโอน (Possible Fake Slip)', scannedAmount: 0 };
+        result = { success: false, message: 'ไม่พบข้อมูลการโอน (อาจเป็นสลิปปลอม)', scannedAmount: 0 };
       }
 
       setVerificationResult(result);
@@ -139,14 +135,19 @@ export default function AdminDashboard() {
     }, 2500);
   };
 
-  // --- UI Helpers ---
+  // --- UI Helpers (Thai Badges) ---
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       occupied: 'bg-green-100 text-green-800 border-green-200',
       vacant: 'bg-gray-100 text-gray-800 border-gray-200',
       maintenance: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     };
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>{status}</span>;
+    const labels: Record<string, string> = {
+      occupied: 'มีผู้เช่า',
+      vacant: 'ว่าง',
+      maintenance: 'ซ่อมบำรุง',
+    };
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}>{labels[status]}</span>;
   };
 
   const getPaymentBadge = (status: string) => {
@@ -156,7 +157,13 @@ export default function AdminDashboard() {
       overdue: 'bg-red-100 text-red-800',
       verified: 'bg-blue-100 text-blue-800',
     };
-    return <span className={`px-2 py-1 rounded text-xs font-bold ${styles[status]}`}>{status.toUpperCase()}</span>;
+    const labels: Record<string, string> = {
+      paid: 'จ่ายแล้ว',
+      pending: 'รอตรวจสอบ',
+      overdue: 'เกินกำหนด',
+      verified: 'ตรวจสอบแล้ว',
+    };
+    return <span className={`px-2 py-1 rounded text-xs font-bold ${styles[status]}`}>{labels[status]}</span>;
   };
 
   // --- Main Render Content ---
@@ -229,10 +236,10 @@ export default function AdminDashboard() {
                         <td className="p-4">{room.status === 'occupied' ? getPaymentBadge(room.paymentStatus) : <span className="text-gray-300">-</span>}</td>
                         <td className="p-4">
                           <div className="flex items-center justify-center gap-2">
-                            <button onClick={() => handleEditClick(room)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg">
+                            <button onClick={() => handleEditClick(room)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg" title="แก้ไข">
                               <IconEdit />
                             </button>
-                            <button onClick={() => handleDeleteRoom(room.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg">
+                            <button onClick={() => handleDeleteRoom(room.id)} className="p-2 text-red-500 hover:bg-red-100 rounded-lg" title="ลบ">
                               <IconTrash />
                             </button>
                           </div>
@@ -271,7 +278,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="p-4 font-bold text-blue-600">{room.id}</td>
                         <td className="p-4 text-gray-600">{room.phone}</td>
-                        <td className="p-4"><span className="text-green-600 text-sm font-medium">Active</span></td>
+                        <td className="p-4"><span className="text-green-600 text-sm font-medium">สัญญาเช่าปกติ</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -293,7 +300,7 @@ export default function AdminDashboard() {
                       <th className="p-4 border-b">ยอดเงิน</th>
                       <th className="p-4 border-b">ครบกำหนด</th>
                       <th className="p-4 border-b">สถานะ</th>
-                      <th className="p-4 border-b text-center">Action</th>
+                      <th className="p-4 border-b text-center">ดำเนินการ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -307,7 +314,7 @@ export default function AdminDashboard() {
                             <span className={`px-2 py-1 rounded text-xs font-bold ${
                                 inv.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                             }`}>
-                                {inv.status.toUpperCase()}
+                                {inv.status === 'paid' ? 'จ่ายแล้ว' : inv.status === 'pending' ? 'รอตรวจสอบ' : inv.status}
                             </span>
                         </td>
                         <td className="p-4 text-center">
@@ -450,7 +457,7 @@ export default function AdminDashboard() {
                     className="w-full border border-gray-300 rounded-lg p-2"
                     >
                     <option value="paid">จ่ายแล้ว</option>
-                    <option value="pending">รอจ่าย</option>
+                    <option value="pending">รอตรวจสอบ</option>
                     <option value="overdue">เกินกำหนด</option>
                     </select>
                 </div>
@@ -478,7 +485,7 @@ export default function AdminDashboard() {
                     <p className="text-gray-500 text-sm mb-6">กำลังตรวจสอบสลิปของห้อง <span className="font-bold text-blue-600">{verifyingInvoice.roomId}</span></p>
 
                     <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-6">
-                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">ยอดที่ต้องชำระ (Expected)</p>
+                        <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">ยอดที่ต้องชำระ</p>
                         <p className="text-3xl font-bold text-gray-800">฿{verifyingInvoice.amount.toLocaleString()}.00</p>
                     </div>
 
@@ -486,13 +493,13 @@ export default function AdminDashboard() {
                         <div className="space-y-4">
                             <div className="w-48 h-48 bg-gray-100 mx-auto rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center flex-col gap-2">
                                 <IconScan />
-                                <span className="text-xs text-gray-400">จำลองพื้นที่กล้อง / QR</span>
+                                <span className="text-xs text-gray-400">จำลองพื้นที่กล้อง / QR Code</span>
                             </div>
                             <button 
                                 onClick={handleSimulateScan}
                                 className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95"
                             >
-                                สแกนตรวจสอบ (Simulate)
+                                สแกนตรวจสอบ (จำลอง)
                             </button>
                         </div>
                     )}
@@ -512,7 +519,7 @@ export default function AdminDashboard() {
                             </div>
                             
                             <h4 className={`text-lg font-bold mb-2 ${verificationResult.success ? 'text-green-600' : 'text-red-600'}`}>
-                                {verificationResult.success ? 'Verified Success' : 'Verification Failed'}
+                                {verificationResult.success ? 'ตรวจสอบสำเร็จ' : 'ตรวจสอบล้มเหลว'}
                             </h4>
                             <p className="text-gray-600 mb-4">{verificationResult.message}</p>
 
