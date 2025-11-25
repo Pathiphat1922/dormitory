@@ -16,6 +16,8 @@ const IconBill = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="non
 const IconScan = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10"></rect></svg>;
 const IconCheckCircle = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const IconAlert = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+// (ใหม่) Icon สำหรับรายได้
+const IconCoins = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="8" r="6"></circle><path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path><path d="M7 6h1v4"></path><path d="M17.12 10.06c-.87-1.24-2.32-1.53-3.69-1.28"></path></svg>;
 
 // --- Types ---
 interface Room {
@@ -81,8 +83,7 @@ export default function AdminDashboard() {
   const handleSaveRoom = () => {
     if (!editingRoom) return;
     setRooms(rooms.map(r => r.id === editingRoom.id ? editingRoom : r));
-    setEditingRoom(null); // ปิด Modal แล้วจะเห็นหน้าหลักอัปเดตทันที
-    // สามารถเพิ่ม alert('บันทึกสำเร็จ'); ตรงนี้ได้ถ้าต้องการ
+    setEditingRoom(null);
   };
 
   const handleDeleteRoom = (id: string) => {
@@ -105,7 +106,6 @@ export default function AdminDashboard() {
   const handleSimulateScan = () => {
     setVerificationStep('scanning');
 
-    // จำลองการ Delay เหมือนยิง API ไปธนาคาร
     setTimeout(() => {
       if (!verifyingInvoice) return;
 
@@ -113,20 +113,13 @@ export default function AdminDashboard() {
       
       let result;
       if (randomScenario > 0.3) {
-        // Case: ผ่านฉลุย
         result = { success: true, message: 'ตรวจสอบสำเร็จ: ยอดเงินถูกต้อง', scannedAmount: verifyingInvoice.amount };
-        
-        // อัปเดตสถานะบิลเป็น Paid
         setInvoices(prev => prev.map(inv => inv.id === verifyingInvoice.id ? { ...inv, status: 'paid' } : inv));
-        // อัปเดตสถานะห้อง
         setRooms(prev => prev.map(r => r.id === verifyingInvoice.roomId ? { ...r, paymentStatus: 'paid' } : r));
-      
       } else if (randomScenario > 0.1) {
-        // Case: ยอดไม่ตรง (เช่น โอนขาด)
         const wrongAmount = verifyingInvoice.amount - 100;
         result = { success: false, message: `ยอดเงินไม่ตรง! (สแกนได้: ${wrongAmount})`, scannedAmount: wrongAmount };
       } else {
-        // Case: สลิปปลอม / ไม่พบข้อมูล
         result = { success: false, message: 'ไม่พบข้อมูลการโอน (อาจเป็นสลิปปลอม)', scannedAmount: 0 };
       }
 
@@ -170,12 +163,18 @@ export default function AdminDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
+        
+        // (ใหม่) คำนวณรายได้รวมจากห้องที่มีผู้เช่า (Occupied)
+        const totalRevenue = rooms
+            .filter(r => r.status === 'occupied')
+            .reduce((sum, r) => sum + r.price, 0);
+
         return (
           <>
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">แดชบอร์ด & ห้องพัก</h2>
-                <p className="text-gray-500 text-sm mt-1">จัดการสถานะห้องพักทั้งหมด</p>
+                <p className="text-gray-500 text-sm mt-1">จัดการสถานะห้องพักและรายรับ</p>
               </div>
               <button 
                 onClick={() => {
@@ -187,26 +186,45 @@ export default function AdminDashboard() {
                 <IconPlus /> เพิ่มห้องพัก
               </button>
             </div>
-             {/* Stats Summary */}
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+
+             {/* Stats Summary: ปรับ Grid เป็น 4 ช่อง (เดิม 3) */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                {/* 1. (ใหม่) Card รายได้รวม */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 h-full w-1 bg-blue-600"></div>
                     <div>
-                        <p className="text-gray-500 text-sm">ห้องทั้งหมด</p>
-                        <p className="text-3xl font-bold text-gray-800">{rooms.length}</p>
+                        <p className="text-gray-500 text-sm font-medium">รายได้/เดือน (ประมาณ)</p>
+                        <p className="text-3xl font-bold text-blue-600 mt-2">฿{totalRevenue.toLocaleString()}</p>
                     </div>
-                    <div className="bg-blue-50 p-3 rounded-lg text-blue-600"><IconBed /></div>
+                    <div className="bg-blue-50 p-4 rounded-full text-blue-600 group-hover:scale-110 transition-transform">
+                        <IconCoins />
+                    </div>
                 </div>
+
+                {/* 2. ห้องทั้งหมด */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm">ห้องว่าง</p>
-                        <p className="text-3xl font-bold text-green-600">{rooms.filter(r => r.status === 'vacant').length}</p>
+                        <p className="text-gray-500 text-sm font-medium">ห้องทั้งหมด</p>
+                        <p className="text-3xl font-bold text-gray-800 mt-2">{rooms.length}</p>
+                    </div>
+                    <div className="bg-gray-100 p-3 rounded-lg text-gray-600"><IconBed /></div>
+                </div>
+
+                {/* 3. ห้องว่าง */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-gray-500 text-sm font-medium">ห้องว่าง</p>
+                        <p className="text-3xl font-bold text-green-600 mt-2">{rooms.filter(r => r.status === 'vacant').length}</p>
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg text-green-600"><IconHome /></div>
                 </div>
+
+                {/* 4. ค้างชำระ */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm">ค้างชำระ</p>
-                        <p className="text-3xl font-bold text-red-600">{rooms.filter(r => r.paymentStatus === 'overdue').length}</p>
+                        <p className="text-gray-500 text-sm font-medium">ค้างชำระ</p>
+                        <p className="text-3xl font-bold text-red-600 mt-2">{rooms.filter(r => r.paymentStatus === 'overdue').length}</p>
                     </div>
                     <div className="bg-red-50 p-3 rounded-lg text-red-600"><IconUsers /></div>
                 </div>
@@ -259,29 +277,29 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">รายชื่อผู้เช่า (Tenants)</h2>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
-                      <th className="p-4 border-b">ชื่อ-สกุล</th>
-                      <th className="p-4 border-b">ห้องพัก</th>
-                      <th className="p-4 border-b">เบอร์โทร</th>
-                      <th className="p-4 border-b">สถานะสัญญา</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {rooms.filter(r => r.status === 'occupied').map((room) => (
-                      <tr key={room.id} className="hover:bg-gray-50">
-                        <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
-                            {room.tenant.charAt(0)}
-                          </div>
-                          {room.tenant}
-                        </td>
-                        <td className="p-4 font-bold text-blue-600">{room.id}</td>
-                        <td className="p-4 text-gray-600">{room.phone}</td>
-                        <td className="p-4"><span className="text-green-600 text-sm font-medium">สัญญาเช่าปกติ</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
+                 <thead>
+                   <tr className="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                     <th className="p-4 border-b">ชื่อ-สกุล</th>
+                     <th className="p-4 border-b">ห้องพัก</th>
+                     <th className="p-4 border-b">เบอร์โทร</th>
+                     <th className="p-4 border-b">สถานะสัญญา</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-100">
+                   {rooms.filter(r => r.status === 'occupied').map((room) => (
+                     <tr key={room.id} className="hover:bg-gray-50">
+                       <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                           {room.tenant.charAt(0)}
+                         </div>
+                         {room.tenant}
+                       </td>
+                       <td className="p-4 font-bold text-blue-600">{room.id}</td>
+                       <td className="p-4 text-gray-600">{room.phone}</td>
+                       <td className="p-4"><span className="text-green-600 text-sm font-medium">สัญญาเช่าปกติ</span></td>
+                     </tr>
+                   ))}
+                 </tbody>
                </table>
             </div>
           </div>
@@ -293,48 +311,48 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">บิล & การตรวจสอบยอดเงิน</h2>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
-                      <th className="p-4 border-b">เลขที่บิล</th>
-                      <th className="p-4 border-b">ห้อง</th>
-                      <th className="p-4 border-b">ยอดเงิน</th>
-                      <th className="p-4 border-b">ครบกำหนด</th>
-                      <th className="p-4 border-b">สถานะ</th>
-                      <th className="p-4 border-b text-center">ดำเนินการ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {invoices.map((inv) => (
-                      <tr key={inv.id} className="hover:bg-gray-50">
-                        <td className="p-4 font-medium text-gray-900">{inv.id}</td>
-                        <td className="p-4 font-bold text-gray-700">{inv.roomId}</td>
-                        <td className="p-4 font-bold text-blue-600">฿{inv.amount.toLocaleString()}</td>
-                        <td className="p-4 text-gray-500 text-sm">{inv.dueDate}</td>
-                        <td className="p-4">
-                            <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                inv.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                                {inv.status === 'paid' ? 'จ่ายแล้ว' : inv.status === 'pending' ? 'รอตรวจสอบ' : inv.status}
-                            </span>
-                        </td>
-                        <td className="p-4 text-center">
-                            {inv.status === 'pending' ? (
-                                <button 
-                                    onClick={() => openVerificationModal(inv)}
-                                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 flex items-center justify-center gap-2 mx-auto w-fit shadow-sm"
-                                >
-                                    <IconScan /> ตรวจสลิป
-                                </button>
-                            ) : (
-                                <span className="text-green-500 flex items-center justify-center gap-1 text-sm font-medium">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    เรียบร้อย
-                                </span>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                 <thead>
+                   <tr className="bg-gray-50 text-gray-500 text-xs font-semibold uppercase tracking-wider">
+                     <th className="p-4 border-b">เลขที่บิล</th>
+                     <th className="p-4 border-b">ห้อง</th>
+                     <th className="p-4 border-b">ยอดเงิน</th>
+                     <th className="p-4 border-b">ครบกำหนด</th>
+                     <th className="p-4 border-b">สถานะ</th>
+                     <th className="p-4 border-b text-center">ดำเนินการ</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-100">
+                   {invoices.map((inv) => (
+                     <tr key={inv.id} className="hover:bg-gray-50">
+                       <td className="p-4 font-medium text-gray-900">{inv.id}</td>
+                       <td className="p-4 font-bold text-gray-700">{inv.roomId}</td>
+                       <td className="p-4 font-bold text-blue-600">฿{inv.amount.toLocaleString()}</td>
+                       <td className="p-4 text-gray-500 text-sm">{inv.dueDate}</td>
+                       <td className="p-4">
+                           <span className={`px-2 py-1 rounded text-xs font-bold ${
+                               inv.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                           }`}>
+                               {inv.status === 'paid' ? 'จ่ายแล้ว' : inv.status === 'pending' ? 'รอตรวจสอบ' : inv.status}
+                           </span>
+                       </td>
+                       <td className="p-4 text-center">
+                           {inv.status === 'pending' ? (
+                               <button 
+                                   onClick={() => openVerificationModal(inv)}
+                                   className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 flex items-center justify-center gap-2 mx-auto w-fit shadow-sm"
+                               >
+                                   <IconScan /> ตรวจสลิป
+                               </button>
+                           ) : (
+                               <span className="text-green-500 flex items-center justify-center gap-1 text-sm font-medium">
+                                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                   เรียบร้อย
+                               </span>
+                           )}
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
                </table>
             </div>
           </div>
