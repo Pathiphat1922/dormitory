@@ -16,7 +16,6 @@ const IconBill = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="non
 const IconScan = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10"></rect></svg>;
 const IconCheckCircle = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
 const IconAlert = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
-// (ใหม่) Icon สำหรับรายได้
 const IconCoins = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="8" cy="8" r="6"></circle><path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path><path d="M7 6h1v4"></path><path d="M17.12 10.06c-.87-1.24-2.32-1.53-3.69-1.28"></path></svg>;
 
 // --- Types ---
@@ -52,10 +51,14 @@ export default function AdminDashboard() {
     { id: 'B202', status: 'maintenance', tenant: '-', price: 3500, paymentStatus: 'paid', phone: '-' },
   ]);
 
+  // เพิ่มข้อมูลจำลอง: บิลเก่าๆ ที่จ่ายแล้ว (เพื่อให้ยอดเงินสะสมดูมีประวัติจริง)
   const [invoices, setInvoices] = useState<Invoice[]>([
     { id: 'INV-2401', roomId: 'B201', amount: 3500, dueDate: '2024-11-25', status: 'pending' },
     { id: 'INV-2402', roomId: 'A103', amount: 3000, dueDate: '2024-11-20', status: 'pending' },
     { id: 'INV-2403', roomId: 'A101', amount: 3000, dueDate: '2024-11-01', status: 'paid' },
+    // Mock Data เพิ่มเติม: บิลของเดือนก่อนๆ ที่จ่ายแล้ว (แม้ห้องจะว่างไปแล้วก็ตาม)
+    { id: 'INV-2399', roomId: 'A102', amount: 3000, dueDate: '2024-10-01', status: 'paid' }, 
+    { id: 'INV-2398', roomId: 'B202', amount: 3500, dueDate: '2024-10-01', status: 'paid' },
   ]);
 
   // --- 3. State Modals ---
@@ -114,6 +117,8 @@ export default function AdminDashboard() {
       let result;
       if (randomScenario > 0.3) {
         result = { success: true, message: 'ตรวจสอบสำเร็จ: ยอดเงินถูกต้อง', scannedAmount: verifyingInvoice.amount };
+        
+        // เมื่อจ่ายสำเร็จ -> อัปเดตสถานะบิลเป็น 'paid' (ยอดเงินรวมจะเพิ่มขึ้นทันที)
         setInvoices(prev => prev.map(inv => inv.id === verifyingInvoice.id ? { ...inv, status: 'paid' } : inv));
         setRooms(prev => prev.map(r => r.id === verifyingInvoice.roomId ? { ...r, paymentStatus: 'paid' } : r));
       } else if (randomScenario > 0.1) {
@@ -164,17 +169,19 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case 'dashboard':
         
-        // (ใหม่) คำนวณรายได้รวมจากห้องที่มีผู้เช่า (Occupied)
-        const totalRevenue = rooms
-            .filter(r => r.status === 'occupied')
-            .reduce((sum, r) => sum + r.price, 0);
+        // *** แก้ไขจุดสำคัญ ***
+        // คำนวณจาก "ประวัติบิลที่จ่ายแล้ว (invoices)" แทน "ห้องที่มีคนอยู่"
+        // ทำให้แม้ผู้เช่าจะออกไปแล้ว (ห้อง vacant) แต่ถ้ายอดเงินเคยเข้ามาแล้ว มันจะยังคงอยู่ครับ
+        const totalRevenue = invoices
+            .filter(inv => inv.status === 'paid') // เลือกเฉพาะบิลที่จ่ายแล้ว
+            .reduce((sum, inv) => sum + inv.amount, 0); // รวมยอดเงิน
 
         return (
           <>
             <div className="flex justify-between items-center mb-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">แดชบอร์ด & ห้องพัก</h2>
-                <p className="text-gray-500 text-sm mt-1">จัดการสถานะห้องพักและรายรับ</p>
+                <p className="text-gray-500 text-sm mt-1">จัดการสถานะห้องพักและรายรับสะสม</p>
               </div>
               <button 
                 onClick={() => {
@@ -187,14 +194,14 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-             {/* Stats Summary: ปรับ Grid เป็น 4 ช่อง (เดิม 3) */}
+             {/* Stats Summary */}
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 
-                {/* 1. (ใหม่) Card รายได้รวม */}
+                {/* 1. Card รายได้สะสม (แก้ไขชื่อและตัวเลข) */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between relative overflow-hidden group">
                     <div className="absolute right-0 top-0 h-full w-1 bg-blue-600"></div>
                     <div>
-                        <p className="text-gray-500 text-sm font-medium">รายได้/เดือน (ประมาณ)</p>
+                        <p className="text-gray-500 text-sm font-medium">รายได้สะสม (ทั้งหมด)</p>
                         <p className="text-3xl font-bold text-blue-600 mt-2">฿{totalRevenue.toLocaleString()}</p>
                     </div>
                     <div className="bg-blue-50 p-4 rounded-full text-blue-600 group-hover:scale-110 transition-transform">
