@@ -145,6 +145,7 @@ export default function DormitoryManagement() {
   const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentRoom, setPaymentRoom] = useState<Room | null>(null);
+  const [qrPreview, setQrPreview] = useState<string | null>(null);
 
   const rooms: Room[] = [
     { id: 'A101', status: 'occupied', tenant: 'สมชาย ใจดี', price: 3000, dueDate: '2024-12-01', waterBill: 150, electricBill: 450, outstandingBalance: 0, paymentStatus: 'paid', phone: '081-234-5678', moveInDate: '2024-01-15' },
@@ -230,11 +231,17 @@ export default function DormitoryManagement() {
 
   const openPaymentModal = (room: Room) => {
     setPaymentRoom(room);
+    setQrPreview(null);
     setPaymentModalOpen(true);
   };
   const closePaymentModal = () => {
     setPaymentRoom(null);
     setPaymentModalOpen(false);
+  };
+
+  const handleQrFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setQrPreview(URL.createObjectURL(file));
   };
 
   const outstandingRooms = rooms.filter(r => r.outstandingBalance > 0);
@@ -696,29 +703,42 @@ export default function DormitoryManagement() {
 
           {paymentModalOpen && paymentRoom && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-              <div className="w-full max-w-md bg-slate-800 rounded-lg border border-slate-700 p-6 text-slate-200">
+              <div className="w-full max-w-xl bg-slate-800 rounded-lg border border-slate-700 p-6 text-slate-200">
                 <h3 className="text-lg font-bold mb-3">ชำระเงิน — ห้อง {paymentRoom.id}</h3>
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span>ค่าเช่าห้อง</span>
-                    <span>฿{paymentRoom.price.toLocaleString()}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>ค่าเช่าห้อง</span>
+                      <span>฿{paymentRoom.price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>ค่าน้ำ</span>
+                      <span>฿{paymentRoom.waterBill.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>ค่าไฟ</span>
+                      <span>฿{paymentRoom.electricBill.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold pt-2 border-t border-slate-700">
+                      <span>รวม</span>
+                      <span>฿{(paymentRoom.price + paymentRoom.waterBill + paymentRoom.electricBill).toLocaleString()}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>ค่าน้ำ</span>
-                    <span>฿{paymentRoom.waterBill.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>ค่าไฟ</span>
-                    <span>฿{paymentRoom.electricBill.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-bold pt-2 border-t border-slate-700">
-                    <span>รวม</span>
-                    <span>฿{(paymentRoom.price + paymentRoom.waterBill + paymentRoom.electricBill).toLocaleString()}</span>
+                  <div className="flex flex-col items-center">
+                    <div className="w-40 h-40 bg-slate-700 rounded-md flex items-center justify-center mb-2 overflow-hidden">
+                      {qrPreview ? (
+                        <img src={qrPreview} alt="QR preview" className="w-full h-full object-contain" />
+                      ) : (
+                        <span className="text-slate-300 text-sm text-center px-2">QR Code Placeholder</span>
+                      )}
+                    </div>
+                    <input type="file" accept="image/*" onChange={handleQrFileChange} className="text-xs text-slate-300" />
+                    <p className="text-xs text-slate-400 mt-2 text-center">หรือใส่รูป QR Code ที่นี่ (คุณจะนำรูปจริงมาแทนได้)</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { /* trigger payment flow if needed */ closePaymentModal(); }}
+                    onClick={() => { /* place to trigger real payment flow */ closePaymentModal(); }}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md"
                   >
                     ยืนยันการชำระ
