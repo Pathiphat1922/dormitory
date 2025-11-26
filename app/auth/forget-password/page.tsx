@@ -27,7 +27,15 @@ export default function ForgetPasswordPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [forgetForm, setForgetForm] = useState({ email: '' });
 
-  const handleForgetPassword = (e: React.MouseEvent) => {
+  const handleBackToLogin = () => {
+    window.location.href = '/auth/login';
+  };
+
+  const handleGoToRegister = () => {
+    window.location.href = '/auth/register';
+  };
+
+  const handleForgetPassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!forgetForm.email) {
       alert('กรุณากรอกอีเมล');
@@ -62,6 +70,7 @@ export default function ForgetPasswordPage() {
 
         <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
           <button
+            onClick={handleBackToLogin}
             className="flex items-center gap-2 text-slate-400 hover:text-slate-200 mb-6 transition"
           >
             <Icons.ArrowLeft />
@@ -77,7 +86,9 @@ export default function ForgetPasswordPage() {
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">อีเมล</label>
               <div className="relative">
-                <Icons.Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Mail />
+                </div>
                 <input
                   type="email"
                   placeholder="admin@example.com"
@@ -102,6 +113,7 @@ export default function ForgetPasswordPage() {
             <p className="text-xs text-slate-300">
               ไม่ได้รับอีเมล? ลองตรวจสอบโฟลเดอร์ spam หรือ{' '}
               <button
+                onClick={handleGoToRegister}
                 className="text-blue-400 hover:text-blue-300 font-medium"
               >
                 สมัครสมาชิกใหม่

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Icons = {
   Home: () => (
@@ -122,6 +123,13 @@ const Icons = {
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
     </svg>
   ),
+  LogOut: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+      <polyline points="16 17 21 12 16 7"></polyline>
+      <line x1="21" y1="12" x2="9" y2="12"></line>
+    </svg>
+  ),
 };
 
 interface Room {
@@ -139,12 +147,37 @@ interface Room {
 }
 
 export default function DormitoryManagement() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+
+   const handleLogout = () => {
+    console.log('🚪 Logging out...');
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('loginTime');
+    document.cookie = 'authToken=; path=/; max-age=0';
+    router.push('/auth/login');
+  };
+
   const [paymentRoom, setPaymentRoom] = useState<Room | null>(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+      if (!isAuthenticated) {
+        console.log('🔒 ไม่ผ่านการรับรองความถูกต้อง, กำลังเปลี่ยนเส้นทางไปยังล็อกอิน...');
+        router.push('/auth/login');
+      } else {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const rooms: Room[] = [
     { id: 'A101', status: 'occupied', tenant: 'สมชาย ใจดี', price: 3000, dueDate: '2024-12-01', waterBill: 150, electricBill: 450, outstandingBalance: 0, paymentStatus: 'paid', phone: '081-234-5678', moveInDate: '2024-01-15' },
@@ -239,6 +272,17 @@ export default function DormitoryManagement() {
 
   const outstandingRooms = rooms.filter(r => r.outstandingBalance > 0);
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-300 text-lg">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200">
       <header className="bg-slate-900 border-b border-slate-700 sticky top-0 z-50">
@@ -275,6 +319,14 @@ export default function DormitoryManagement() {
             <button className="relative p-2 hover:bg-slate-800 rounded-lg">
               <Icons.Bell />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+             <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-300 hover:text-red-400"
+              title="ออกจากระบบ"
+            >
+              <Icons.LogOut />
+              <span className="hidden sm:inline text-sm font-medium">ออกจากระบบ</span>
             </button>
             <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white font-semibold">
               A

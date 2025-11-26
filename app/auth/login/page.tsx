@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Icons = {
   Home: () => (
@@ -38,47 +39,100 @@ const Icons = {
       <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
   ),
+  AlertCircle: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+  ),
 };
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
 
-  const handleLogin = (e: React.MouseEvent) => {
+  // ✅ ใช้ fetch API แทนตรวจสอบ admin แบบเก่า
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!loginForm.email || !loginForm.password) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      setErrorMessage("กรุณากรอกข้อมูลให้ครบถ้วน");
+      setTimeout(() => setErrorMessage(""), 3000);
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSuccessMessage('เข้าสู่ระบบสำเร็จ!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    }, 1500);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginForm)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(data.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setSuccessMessage("เข้าสู่ระบบสำเร็จ! กำลังเปลี่ยนหน้า...");
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์");
+    }
+
+    setLoading(false);
+  };
+
+  const handleGoToRegister = () => {
+    router.push('/auth/register');
+  };
+
+  const handleGoToForgetPassword = () => {
+    router.push('/auth/forget-password');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 flex items-center justify-center p-4">
-      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Success Message */}
         {successMessage && (
-          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-in">
+          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-pulse">
             <Icons.Check />
             <span className="text-sm text-green-300">{successMessage}</span>
           </div>
         )}
 
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-600/20 border border-red-500/50 rounded-lg flex items-center gap-3">
+            <Icons.AlertCircle />
+            <span className="text-sm text-red-300">{errorMessage}</span>
+          </div>
+        )}
+
         <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
-          {/* Header */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
               <Icons.Home />
@@ -94,17 +148,20 @@ export default function LoginPage() {
             <p className="text-sm text-slate-400">ยินดีต้อนรับกลับมา</p>
           </div>
 
-          <div className="space-y-4 mb-6">
+          <form onSubmit={handleLogin} className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">อีเมล</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">ชื่อผู้ใช้</label>
               <div className="relative">
-                <Icons.Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Mail />
+                </div>
                 <input
-                  type="email"
-                  placeholder="admin@example.com"
+                  type="text"
+                  placeholder="admin"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  disabled={loading}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
                 />
               </div>
             </div>
@@ -112,17 +169,23 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">รหัสผ่าน</label>
               <div className="relative">
-                <Icons.Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Lock />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={loginForm.password}
                   onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  disabled={loading}
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
                 />
                 <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 disabled:opacity-50"
+                  aria-label="toggle password"
                 >
                   {showPassword ? <Icons.Eye /> : <Icons.EyeOff />}
                 </button>
@@ -131,32 +194,58 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded bg-slate-700 border-slate-600" />
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded bg-slate-700 border-slate-600" 
+                  disabled={loading}
+                />
                 <span className="text-slate-300">จำไว้ในที่นี้</span>
               </label>
               <button
-                className="text-blue-400 hover:text-blue-300 font-medium transition"
+                type="button"
+                onClick={handleGoToForgetPassword}
+                disabled={loading}
+                className="text-blue-400 hover:text-blue-300 font-medium transition disabled:opacity-50"
               >
                 ลืมรหัสผ่าน?
               </button>
             </div>
 
             <button
-              onClick={handleLogin}
+              type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
             >
-              {loading ? 'กำลังประมวลผล...' : 'เข้าสู่ระบบ'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>กำลังเข้าสู่ระบบ...</span>
+                </>
+              ) : (
+                'เข้าสู่ระบบ'
+              )}
             </button>
-          </div>
+          </form>
 
           <div className="text-center text-sm">
             <span className="text-slate-400">ยังไม่มีบัญชี? </span>
             <button
-              className="text-blue-400 hover:text-blue-300 font-semibold transition"
+              type="button"
+              onClick={handleGoToRegister}
+              disabled={loading}
+              className="text-blue-400 hover:text-blue-300 font-semibold transition disabled:opacity-50"
             >
               สมัครสมาชิก
             </button>
+          </div>
+
+          <div className="mt-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <p className="text-xs text-blue-300 text-center">
+              💡 <strong>ทดสอบ:</strong> admin@email.com / adminforever
+            </p>
           </div>
         </div>
       </div>

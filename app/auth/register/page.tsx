@@ -1,224 +1,248 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 
 const Icons = {
-  Home: () => (
+  Mail: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
     </svg>
   ),
-  Users: () => (
+  Lock: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-      <circle cx="9" cy="7" r="4"></circle>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
     </svg>
   ),
-  Bed: () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M2 4v16"></path>
-      <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
-      <path d="M2 17h20"></path>
-      <path d="M6 8V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"></path>
-    </svg>
-  ),
-  DollarSign: () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="1" x2="12" y2="23"></line>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-    </svg>
-  ),
-  Bell: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-    </svg>
-  ),
-  Search: () => (
+  Eye: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.35-4.35"></path>
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
     </svg>
   ),
-  Plus: () => (
+  EyeOff: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+      <line x1="1" y1="1" x2="23" y2="23"></line>
     </svg>
   ),
-  CheckCircle: () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-  ),
-  Menu: () => (
+  ArrowLeft: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="3" y1="12" x2="21" y2="12"></line>
-      <line x1="3" y1="6" x2="21" y2="6"></line>
-      <line x1="3" y1="18" x2="21" y2="18"></line>
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
     </svg>
   ),
-  X: () => (
+  Check: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  ),
-  LogOut: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-      <polyline points="16 17 21 12 16 7"></polyline>
-      <line x1="21" y1="12" x2="9" y2="12"></line>
+      <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
   ),
 };
 
-interface Room {
-  id: string;
-  status: 'occupied' | 'vacant' | 'maintenance';
-  tenant: string;
-  price: number;
-  paymentStatus: 'paid' | 'pending' | 'overdue';
-}
+export default function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    // ตรวจสอบ token จาก cookie
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('authToken='))
-      ?.split('=')[1];
-
-    // ถ้าไม่มี token ให้ redirect ไปหน้า login
-    if (!token) {
-      router.push('/auth/login');
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    document.cookie = 'authToken=; path=/; max-age=0';
-    router.push('/auth/login');
+  const handleBackToLogin = () => {
+    window.location.href = '/auth/login';
   };
 
-  const stats = [
-    { label: 'ห้องทั้งหมด', value: '5', icon: 'Bed', change: '+0%' },
-    { label: 'ห้องว่าง', value: '2', icon: 'CheckCircle', change: '-20%' },
-    { label: 'ผู้เช่า', value: '3', icon: 'Users', change: '+12%' },
-    { label: 'รายได้เดือนนี้', value: '13,400', icon: 'DollarSign', change: '+8%' },
-  ];
+  const handleRegister = async (e: React.MouseEvent) => {
+    e.preventDefault();
 
-  const navItems = [
-    { icon: 'Home', label: 'แดชบอร์ด', id: 'dashboard' },
-    { icon: 'Bed', label: 'จัดการห้องพัก', id: 'rooms' },
-    { icon: 'Users', label: 'ผู้เช่า', id: 'tenants' },
-  ];
+    if (!registerForm.name || !registerForm.email || !registerForm.phone || !registerForm.password) {
+      setErrorMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+      setTimeout(() => setErrorMessage(''), 3000);
+      return;
+    }
 
-  const IconComponent = ({ name }: { name: string }) => {
-    const Component = Icons[name as keyof typeof Icons];
-    return Component ? <Component /> : null;
+    if (registerForm.password !== registerForm.confirmPassword) {
+      setErrorMessage('รหัสผ่านไม่ตรงกัน');
+      setTimeout(() => setErrorMessage(''), 3000);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registerForm)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(data.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
+        setLoading(false);
+        return;
+      }
+
+      setSuccessMessage('สมัครสมาชิกสำเร็จ! กำลังกลับไปเข้าสู่ระบบ...');
+      setTimeout(() => {
+        handleBackToLogin();
+      }, 2000);
+
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์');
+    }
+
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200">
-      <header className="bg-slate-900 border-b border-slate-700 sticky top-0 z-50">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-800 rounded-lg lg:hidden"
-            >
-              {sidebarOpen ? <Icons.X /> : <Icons.Menu />}
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-white">
-                <Icons.Home />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-100">ระบบจัดการหอพัก</h1>
-                <p className="text-xs text-slate-300">Dormitory Management System</p>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-in">
+            <Icons.Check />
+            <span className="text-sm text-green-300">{successMessage}</span>
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-600/20 border border-red-500/50 rounded-lg flex items-center gap-3 animate-in">
+            <Icons.Check />
+            <span className="text-sm text-red-300">{errorMessage}</span>
+          </div>
+        )}
+
+        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
+          <button
+            onClick={handleBackToLogin}
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 mb-6 transition"
+          >
+            <Icons.ArrowLeft />
+            <span className="text-sm font-medium">กลับไปเข้าสู่ระบบ</span>
+          </button>
+
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-slate-100 mb-2">สมัครสมาชิก</h2>
+            <p className="text-sm text-slate-400">สร้างบัญชีใหม่เพื่อใช้งาน</p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative hidden md:block">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <Icons.Search />
-              </div>
+          <div className="space-y-4 mb-6">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">ชื่อ-นามสกุล</label>
               <input
                 type="text"
-                placeholder="ค้นหาห้อง, ผู้เช่า..."
-                className="pl-10 pr-4 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 w-64"
+                placeholder="สมชาย ใจดี"
+                value={registerForm.name}
+                onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
+                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
-            <button className="relative p-2 hover:bg-slate-800 rounded-lg">
-              <Icons.Bell />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-slate-800 rounded-lg text-red-400 hover:text-red-300 transition"
-              title="ออกจากระบบ"
-            >
-              <Icons.LogOut />
-            </button>
-            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white font-semibold">
-              A
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">อีเมล</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Mail />
+                </div>
+                <input
+                  type="email"
+                  placeholder="example@email.com"
+                  value={registerForm.email}
+                  onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+              </div>
             </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">เบอร์โทรศัพท์</label>
+              <input
+                type="tel"
+                placeholder="081-234-5678"
+                value={registerForm.phone}
+                onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
+                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">รหัสผ่าน</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Lock />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={registerForm.password}
+                  onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+                <button
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                >
+                  {showPassword ? <Icons.Eye /> : <Icons.EyeOff />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">ยืนยันรหัสผ่าน</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Icons.Lock />
+                </div>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={registerForm.confirmPassword}
+                  onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+                <button
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                >
+                  {showConfirmPassword ? <Icons.Eye /> : <Icons.EyeOff />}
+                </button>
+              </div>
+            </div>
+
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" className="w-4 h-4 rounded bg-slate-700 border-slate-600 mt-0.5" />
+              <span className="text-slate-300">ฉันยินยอมตามนโยบายและเงื่อนไขการใช้งาน</span>
+            </label>
+
+            <button
+              onClick={handleRegister}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {loading ? 'กำลังประมวลผล...' : 'สมัครสมาชิก'}
+            </button>
           </div>
         </div>
-      </header>
-
-      <div className="flex">
-        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-700 transition-transform duration-300 pt-16 lg:pt-0`}>
-          <nav className="p-4 space-y-2 h-full">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-slate-300 hover:bg-slate-800"
-              >
-                <IconComponent name={item.icon} />
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="flex-1 p-6 lg:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, idx) => (
-              <div key={idx} className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-slate-800 w-12 h-12 rounded-lg flex items-center justify-center text-white">
-                    <IconComponent name={stat.icon} />
-                  </div>
-                  <span className={`text-xs font-medium ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                    {stat.change}
-                  </span>
-                </div>
-                <p className="text-slate-300 text-sm mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-slate-100">
-                  {stat.label.includes('รายได้') ? '฿' : ''}{stat.value}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 bg-slate-800 rounded-xl border border-slate-700 p-6">
-            <h2 className="text-lg font-bold text-slate-100 mb-4">ยินดีต้อนรับกลับมา!</h2>
-            <p className="text-slate-300">
-              คุณได้เข้าสู่ระบบจัดการหอพักเรียบร้อยแล้ว คลิกปุ่มออกจากระบบ (LogOut) ที่มุมขวาบนเพื่อออกจากระบบ
-            </p>
-          </div>
-        </main>
       </div>
     </div>
   );
