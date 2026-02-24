@@ -155,13 +155,13 @@ export default function DormitoryManagement() {
   const [showOutstandingOnly, setShowOutstandingOnly] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
-   const handleLogout = () => {
+  const handleLogout = () => {
     console.log('🚪 Logging out...');
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('loginTime');
     document.cookie = 'authToken=; path=/; max-age=0';
-    router.push('/auth/login');
+    router.push('/login');
   };
 
   const [paymentRoom, setPaymentRoom] = useState<Room | null>(null);
@@ -171,7 +171,7 @@ export default function DormitoryManagement() {
       const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
       if (!isAuthenticated) {
         console.log('🔒 ไม่ผ่านการรับรองความถูกต้อง, กำลังเปลี่ยนเส้นทางไปยังล็อกอิน...');
-        router.push('/auth/login');
+        router.push('/login');
       } else {
         setIsLoading(false);
       }
@@ -320,7 +320,7 @@ export default function DormitoryManagement() {
               <Icons.Bell />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-             <button
+            <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-300 hover:text-red-400"
               title="ออกจากระบบ"
@@ -342,11 +342,10 @@ export default function DormitoryManagement() {
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setSelectedRoom(null); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === item.id
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
                     ? 'bg-slate-700 text-slate-100 font-medium'
                     : 'text-slate-300 hover:bg-slate-800'
-                }`}
+                  }`}
               >
                 <IconComponent name={item.icon} />
                 {item.label}
@@ -528,12 +527,11 @@ export default function DormitoryManagement() {
                   <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                     {recentActivities.map((activity, idx) => (
                       <div key={idx} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-800 rounded-lg transition-colors">
-                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                          activity.type === 'payment' ? 'bg-green-500' :
+                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'payment' ? 'bg-green-500' :
                             activity.type === 'checkin' ? 'bg-blue-500' :
                               activity.type === 'maintenance' ? 'bg-yellow-500' :
                                 'bg-red-500'
-                        }`}></div>
+                          }`}></div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm text-slate-100">{activity.action}</p>
                           <p className="text-xs text-slate-300 mt-1 flex items-center gap-1">
