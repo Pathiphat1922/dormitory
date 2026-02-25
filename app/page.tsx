@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const Icons = {
   Home: () => (
@@ -179,23 +180,26 @@ export default function DormitoryManagement() {
     checkAuth();
   }, [router]);
 
-  const rooms: Room[] = [
+  const [roomData, setRoomData] = useState<Room[]>([
     { id: 'A101', status: 'occupied', tenant: 'สมชาย ใจดี', price: 3000, dueDate: '2024-12-01', waterBill: 150, electricBill: 450, outstandingBalance: 0, paymentStatus: 'paid', phone: '081-234-5678', moveInDate: '2024-01-15' },
     { id: 'A102', status: 'vacant', tenant: '-', price: 3000, dueDate: '-', waterBill: 0, electricBill: 0, outstandingBalance: 0, paymentStatus: 'paid', phone: '-', moveInDate: '-' },
     { id: 'A103', status: 'occupied', tenant: 'สมหญิง สวยงาม', price: 3000, dueDate: '2024-11-28', waterBill: 200, electricBill: 380, outstandingBalance: 3580, paymentStatus: 'overdue', phone: '082-345-6789', moveInDate: '2024-03-10' },
     { id: 'B201', status: 'occupied', tenant: 'วิชัย มั่นคง', price: 3500, dueDate: '2024-12-05', waterBill: 180, electricBill: 520, outstandingBalance: 0, paymentStatus: 'paid', phone: '083-456-7890', moveInDate: '2024-02-20' },
     { id: 'B202', status: 'maintenance', tenant: '-', price: 3500, dueDate: '-', waterBill: 0, electricBill: 0, outstandingBalance: 0, paymentStatus: 'paid', phone: '-', moveInDate: '-' },
-  ];
+  ]);
+
+  const [income, setIncome] = useState(13400);
 
   const stats = [
-    { label: 'ห้องทั้งหมด', value: '5', icon: 'Bed', color: 'bg-slate-800', change: '+0%' },
-    { label: 'ห้องว่าง', value: '2', icon: 'CheckCircle', color: 'bg-slate-800', change: '-20%' },
-    { label: 'ผู้เช่า', value: '3', icon: 'Users', color: 'bg-slate-800', change: '+12%' },
-    { label: 'รายได้เดือนนี้', value: '13,400', icon: 'DollarSign', color: 'bg-slate-800', change: '+8%' },
+    { label: 'ห้องทั้งหมด', value: roomData.length.toString(), icon: 'Bed', color: 'text-blue-600', bgColor: 'bg-blue-50', gradient: 'from-blue-500 to-indigo-600' },
+    { label: 'ห้องว่าง', value: roomData.filter(r => r.status === 'vacant').length.toString(), icon: 'CheckCircle', color: 'text-emerald-600', bgColor: 'bg-emerald-50', gradient: 'from-emerald-500 to-teal-600' },
+    { label: 'รายได้เดือนนี้', value: income.toLocaleString(), icon: 'DollarSign', color: 'text-blue-600', bgColor: 'bg-blue-50', gradient: 'from-blue-600 to-cyan-600' },
+    { label: 'ยอดค้างชำระ', value: roomData.reduce((sum, r) => sum + r.outstandingBalance, 0).toLocaleString(), icon: 'AlertCircle', color: 'text-red-600', bgColor: 'bg-red-50', gradient: 'from-red-500 to-rose-600' },
   ];
 
-  const totalOutstanding = rooms.reduce((sum, room) => sum + room.outstandingBalance, 0);
-  const overdueRooms = rooms.filter(room => room.paymentStatus === 'overdue').length;
+  // Unused variables removed to fix lint
+  // const totalOutstanding = rooms.reduce((sum, room) => sum + room.outstandingBalance, 0);
+  // const overdueRooms = rooms.filter(room => room.paymentStatus === 'overdue').length;
 
   const recentActivities = [
     { action: 'ห้อง A101 ชำระค่าเช่าแล้ว', time: '5 นาทีที่แล้ว', type: 'payment' },
@@ -270,65 +274,85 @@ export default function DormitoryManagement() {
     setPaymentModalOpen(false);
   };
 
-  const outstandingRooms = rooms.filter(r => r.outstandingBalance > 0);
+  const outstandingRooms = roomData.filter(r => r.outstandingBalance > 0);
+
+  const handleConfirmPayment = () => {
+    if (paymentRoom) {
+      const totalToPay = paymentRoom.price + paymentRoom.waterBill + paymentRoom.electricBill;
+
+      setRoomData(prev => prev.map(r =>
+        r.id === paymentRoom.id
+          ? { ...r, outstandingBalance: 0, paymentStatus: 'paid' }
+          : r
+      ));
+
+      setIncome(prev => prev + totalToPay);
+
+      // Update activity log
+      console.log(`✅ Room ${paymentRoom.id} paid ฿${totalToPay.toLocaleString()}`);
+
+      setPaymentModalOpen(false);
+      setPaymentRoom(null);
+    }
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-300 text-lg">กำลังโหลด...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-500 text-lg">กำลังโหลด...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200">
-      <header className="bg-slate-900 border-b border-slate-700 sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-800 rounded-lg lg:hidden"
+              className="p-2 hover:bg-slate-100 rounded-lg lg:hidden"
             >
               {sidebarOpen ? <Icons.X /> : <Icons.Menu />}
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-900">
                 <Icons.Home />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-100">ระบบจัดการหอพัก</h1>
-                <p className="text-xs text-slate-300">Dormitory Management System</p>
+                <h1 className="text-xl font-bold text-slate-900">ระบบจัดการหอพัก</h1>
+                <p className="text-xs text-slate-500">Dormitory Management System</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="relative hidden md:block">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <Icons.Search />
               </div>
               <input
                 type="text"
                 placeholder="ค้นหาห้อง, ผู้เช่า..."
-                className="pl-10 pr-4 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500 w-64"
+                className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 w-64"
               />
             </div>
-            <button className="relative p-2 hover:bg-slate-800 rounded-lg">
+            <button className="relative p-2 hover:bg-slate-100 rounded-lg">
               <Icons.Bell />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-300 hover:text-red-400"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-500 hover:text-red-500"
               title="ออกจากระบบ"
             >
               <Icons.LogOut />
               <span className="hidden sm:inline text-sm font-medium">ออกจากระบบ</span>
             </button>
-            <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center text-white font-semibold">
+            <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-700 font-semibold text-sm">
               A
             </div>
           </div>
@@ -336,15 +360,15 @@ export default function DormitoryManagement() {
       </header>
 
       <div className="flex">
-        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-700 transition-transform duration-300 pt-16 lg:pt-0`}>
+        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transition-transform duration-300 pt-16 lg:pt-0`}>
           <nav className="p-4 space-y-2 h-full">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setSelectedRoom(null); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
-                    ? 'bg-slate-700 text-slate-100 font-medium'
-                    : 'text-slate-300 hover:bg-slate-800'
+                  ? 'bg-slate-100 text-blue-600 font-bold'
+                  : 'text-slate-600 hover:bg-slate-50'
                   }`}
               >
                 <IconComponent name={item.icon} />
@@ -359,78 +383,82 @@ export default function DormitoryManagement() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, idx) => (
-                  <div key={idx} className="bg-slate-800 rounded-xl border border-slate-700 p-6 hover:shadow-lg transition-shadow">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center text-white`}>
+                  <div key={idx} className="bg-white rounded-3xl border border-slate-100 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 group cursor-default relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 rounded-bl-full translate-x-8 -translate-y-8" style={{ background: `linear-gradient(to bottom right, var(--tw-gradient-from), var(--tw-gradient-to))` }}></div>
+                    <div className="flex items-center gap-5">
+                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg bg-gradient-to-br ${stat.gradient} group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
                         <IconComponent name={stat.icon} />
                       </div>
-                      <span className={`text-xs font-medium ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                        {stat.change}
-                      </span>
+                      <div>
+                        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.15em] mb-1">{stat.label}</p>
+                        <p className="text-3xl font-black text-slate-900 tracking-tight flex items-baseline gap-1">
+                          {stat.label.includes('รายได้') || stat.label.includes('ชำระ') ? <span className="text-lg font-bold text-slate-400">฿</span> : ''}
+                          {stat.value}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-slate-300 text-sm mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold text-slate-100">
-                      {stat.label.includes('รายได้') ? '฿' : ''}{stat.value}
-                    </p>
                   </div>
                 ))}
               </div>
 
               <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {outstandingRooms.length ? outstandingRooms.map(r => (
-                  <div key={r.id} className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                  <div key={r.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="text-xs text-slate-300">ห้อง</p>
-                        <p className="text-lg font-bold text-slate-100">{r.id}</p>
+                        <p className="text-xs text-slate-500">ห้อง</p>
+                        <p className="text-lg font-bold text-slate-900">{r.id}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-slate-300">ค้างชำระ</p>
-                        <p className="text-lg font-bold text-red-400">฿{r.outstandingBalance.toLocaleString()}</p>
+                        <p className="text-xs text-slate-500">ค้างชำระ</p>
+                        <p className="text-lg font-bold text-red-500">฿{r.outstandingBalance.toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => openPaymentModal(r)}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm"
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md text-sm font-medium transition-colors"
                       >
                         ชำระเงิน
                       </button>
                       <button
                         onClick={() => { setSelectedRoom(r); setActiveTab('rooms'); }}
-                        className="px-3 py-2 border border-slate-700 rounded-md text-sm text-slate-200"
+                        className="px-3 py-2 border border-slate-200 rounded-md text-sm text-slate-600 hover:bg-slate-50 transition-colors"
                       >
                         ดูรายละเอียด
                       </button>
                     </div>
                   </div>
                 )) : (
-                  <div className="col-span-full text-slate-300">ไม่มีห้องที่มียอดค้างชำระ</div>
+                  <div className="col-span-full text-slate-500">ไม่มีห้องที่มียอดค้างชำระ</div>
                 )}
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700">
-                  <div className="p-4 sm:p-6 border-b border-slate-700 flex items-center justify-between">
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+                  <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white/50 backdrop-blur-sm sticky top-0 z-10">
                     <div>
-                      <h2 className="text-base sm:text-lg font-bold text-slate-100">
+                      <h2 className="text-xl font-black text-slate-900 tracking-tight">
                         {showOutstandingOnly ? 'ห้องที่ค้างชำระ' : 'รายการห้องพัก'}
                       </h2>
-                      <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                      <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">
                         {showOutstandingOnly
-                          ? `แสดงห้องที่มียอดค้างชำระ ${rooms.filter(r => r.outstandingBalance > 0).length} ห้อง`
-                          : 'คลิกเพื่อดูรายละเอียด'
+                          ? `แสดงห้องที่มียอดค้างชำระ ${roomData.filter(r => r.outstandingBalance > 0).length} ห้อง`
+                          : 'ข้อมูลสถานะห้องพักปัจจุบัน'
                         }
                       </p>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-3">
                       <button
                         onClick={() => setShowOutstandingOnly(!showOutstandingOnly)}
-                        className="mr-2 px-3 py-2 rounded-lg bg-slate-700 text-slate-100 text-sm hover:bg-slate-600 transition-colors"
+                        className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-wider border ${showOutstandingOnly
+                          ? 'bg-red-50 text-red-600 border-red-200 shadow-sm'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
                       >
                         {showOutstandingOnly ? 'แสดงทั้งหมด' : 'ดูค้างชำระ'}
                       </button>
-                      <button className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm">
+                      <button className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-xs font-black shadow-lg shadow-blue-600/20 active:scale-95 uppercase tracking-wider">
                         <Icons.Plus />
                         <span className="hidden sm:inline">เพิ่มห้อง</span>
                       </button>
@@ -439,36 +467,36 @@ export default function DormitoryManagement() {
 
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-slate-800 border-b border-slate-700">
+                      <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">ห้อง</th>
-                          <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">สถานะ</th>
-                          <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">ผู้เช่า</th>
-                          <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">ค่าเช่า</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ห้อง</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">สถานะ</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ผู้เช่า</th>
+                          <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ค่าเช่า</th>
                           {showOutstandingOnly && (
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">ค้างชำระ</th>
+                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ค้างชำระ</th>
                           )}
-                          <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase">การชำระ</th>
+                          <th className="px-6 py-4 text-left font-black tracking-widest">การชำระ</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-700">
-                        {(showOutstandingOnly ? rooms.filter(r => r.outstandingBalance > 0) : rooms).map((room) => (
+                      <tbody className="divide-y divide-slate-50">
+                        {(showOutstandingOnly ? roomData.filter(r => r.outstandingBalance > 0) : roomData).map((room) => (
                           <tr
                             key={room.id}
                             onClick={() => handleRoomClick(room)}
-                            className={`transition-colors ${room.status !== 'vacant' ? 'hover:bg-slate-800 cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-800' : ''}`}
+                            className={`transition-colors ${room.status !== 'vacant' ? 'hover:bg-slate-50 cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-50' : ''}`}
                           >
                             <td className="px-6 py-4">
-                              <span className="font-semibold text-slate-100">{room.id}</span>
+                              <span className="font-bold text-slate-900">{room.id}</span>
                             </td>
                             <td className="px-6 py-4">
                               {getStatusBadge(room.status)}
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-300">{room.tenant}</td>
-                            <td className="px-6 py-4 text-sm font-medium text-slate-100">฿{room.price.toLocaleString()}</td>
+                            <td className="px-6 py-4 text-sm text-slate-600">{room.tenant}</td>
+                            <td className="px-6 py-4 text-sm font-bold text-slate-900">฿{room.price.toLocaleString()}</td>
                             {showOutstandingOnly && (
                               <td className="px-6 py-4">
-                                <span className="text-sm font-bold text-red-400">฿{room.outstandingBalance.toLocaleString()}</span>
+                                <span className="text-sm font-bold text-red-600">฿{room.outstandingBalance.toLocaleString()}</span>
                               </td>
                             )}
                             <td className="px-6 py-4">
@@ -481,29 +509,29 @@ export default function DormitoryManagement() {
                     </table>
                   </div>
 
-                  <div className="md:hidden divide-y divide-slate-700">
-                    {(showOutstandingOnly ? rooms.filter(r => r.outstandingBalance > 0) : rooms).map((room) => (
+                  <div className="md:hidden divide-y divide-slate-50">
+                    {(showOutstandingOnly ? roomData.filter(r => r.outstandingBalance > 0) : roomData).map((room) => (
                       <div
                         key={room.id}
                         onClick={() => handleRoomClick(room)}
-                        className={`p-4 transition-colors ${room.status !== 'vacant' ? 'cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-800' : ''}`}
+                        className={`p-4 transition-colors ${room.status !== 'vacant' ? 'cursor-pointer' : 'opacity-60'} ${room.outstandingBalance > 0 && showOutstandingOnly ? 'bg-red-50' : ''}`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <h3 className="text-lg font-bold text-slate-100 mb-1">ห้อง {room.id}</h3>
-                            <p className="text-sm text-slate-300">{room.tenant}</p>
+                            <h3 className="text-lg font-bold text-slate-900 mb-1">ห้อง {room.id}</h3>
+                            <p className="text-sm text-slate-600">{room.tenant}</p>
                           </div>
                           {getStatusBadge(room.status)}
                         </div>
 
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs text-slate-400 mb-1">ค่าเช่า</p>
-                            <p className="text-base font-semibold text-slate-100">฿{room.price.toLocaleString()}</p>
+                            <p className="text-xs text-slate-500 mb-1">ค่าเช่า</p>
+                            <p className="text-base font-bold text-slate-900">฿{room.price.toLocaleString()}</p>
                             {showOutstandingOnly && room.outstandingBalance > 0 && (
                               <>
-                                <p className="text-xs text-red-400 mt-2">ค้างชำระ</p>
-                                <p className="text-base font-bold text-red-400">฿{room.outstandingBalance.toLocaleString()}</p>
+                                <p className="text-xs text-red-600 mt-2">ค้างชำระ</p>
+                                <p className="text-base font-bold text-red-600">฿{room.outstandingBalance.toLocaleString()}</p>
                               </>
                             )}
                           </div>
@@ -518,23 +546,23 @@ export default function DormitoryManagement() {
                   </div>
                 </div>
 
-                <div className="bg-slate-800 rounded-xl border border-slate-700">
-                  <div className="p-4 sm:p-6 border-b border-slate-700">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-100">กิจกรรมล่าสุด</h2>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-1">อัพเดทแบบเรียลไทม์</p>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-4 sm:p-6 border-b border-slate-100">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900">กิจกรรมล่าสุด</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">อัพเดทแบบเรียลไทม์</p>
                   </div>
 
                   <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
                     {recentActivities.map((activity, idx) => (
-                      <div key={idx} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-800 rounded-lg transition-colors">
+                      <div key={idx} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-slate-50 rounded-lg transition-colors">
                         <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'payment' ? 'bg-green-500' :
-                            activity.type === 'checkin' ? 'bg-blue-500' :
-                              activity.type === 'maintenance' ? 'bg-yellow-500' :
-                                'bg-red-500'
+                          activity.type === 'checkin' ? 'bg-blue-500' :
+                            activity.type === 'maintenance' ? 'bg-yellow-500' :
+                              'bg-red-500'
                           }`}></div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm text-slate-100">{activity.action}</p>
-                          <p className="text-xs text-slate-300 mt-1 flex items-center gap-1">
+                          <p className="text-xs sm:text-sm text-slate-900">{activity.action}</p>
+                          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                             <Icons.Clock />
                             {activity.time}
                           </p>
@@ -543,8 +571,8 @@ export default function DormitoryManagement() {
                     ))}
                   </div>
 
-                  <div className="p-3 sm:p-4 border-t border-slate-700">
-                    <button className="w-full text-xs sm:text-sm text-slate-300 hover:text-slate-100 font-medium">
+                  <div className="p-3 sm:p-4 border-t border-slate-100">
+                    <button className="w-full text-xs sm:text-sm text-slate-500 hover:text-slate-900 font-bold transition-colors">
                       ดูกิจกรรมทั้งหมด →
                     </button>
                   </div>
@@ -563,12 +591,12 @@ export default function DormitoryManagement() {
                 <span>กลับไปรายการห้อง</span>
               </button>
 
-              <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-4 sm:p-6 text-white">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 sm:p-6 text-white">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                      <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">ห้อง {selectedRoom.id}</h1>
-                      <p className="text-sm sm:text-base text-slate-300">รายละเอียดห้องพักและการชำระเงิน</p>
+                      <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 text-white">ห้อง {selectedRoom.id}</h1>
+                      <p className="text-sm sm:text-base text-blue-100">รายละเอียดห้องพักและการชำระเงิน</p>
                     </div>
                     <div className="self-start sm:self-auto">
                       {getPaymentStatusBadge(selectedRoom.paymentStatus)}
@@ -576,97 +604,97 @@ export default function DormitoryManagement() {
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 border-b border-slate-700">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-100 mb-3 sm:mb-4">ข้อมูลผู้เช่า</h2>
+                <div className="p-4 sm:p-6 border-b border-slate-100">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">ข้อมูลผู้เช่า</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
                         {selectedRoom.tenant.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm text-slate-300">ชื่อผู้เช่า</p>
-                        <p className="font-semibold text-sm sm:text-base text-slate-100 truncate">{selectedRoom.tenant}</p>
+                        <p className="text-xs sm:text-sm text-slate-500">ชื่อผู้เช่า</p>
+                        <p className="font-bold text-sm sm:text-base text-slate-900 truncate">{selectedRoom.tenant}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-slate-100 flex-shrink-0">
+                      <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-600 flex-shrink-0">
                         <Icons.Phone />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm text-slate-300">เบอร์โทรศัพท์</p>
-                        <p className="font-semibold text-sm sm:text-base text-slate-100">{selectedRoom.phone}</p>
+                        <p className="text-xs sm:text-sm text-slate-500">เบอร์โทรศัพท์</p>
+                        <p className="font-bold text-sm sm:text-base text-slate-900">{selectedRoom.phone}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
+                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
                         <Icons.Calendar />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm text-slate-300">วันที่เข้าพัก</p>
-                        <p className="font-semibold text-sm sm:text-base text-slate-100">{selectedRoom.moveInDate}</p>
+                        <p className="text-xs sm:text-sm text-slate-500">วันที่เข้าพัก</p>
+                        <p className="font-bold text-sm sm:text-base text-slate-900">{selectedRoom.moveInDate}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 flex-shrink-0">
+                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
                         <Icons.DollarSign />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs sm:text-sm text-slate-300">ค่าเช่าต่อเดือน</p>
-                        <p className="font-semibold text-sm sm:text-base text-slate-100">฿{selectedRoom.price.toLocaleString()}</p>
+                        <p className="text-xs sm:text-sm text-slate-500">ค่าเช่าต่อเดือน</p>
+                        <p className="font-bold text-sm sm:text-base text-slate-900">฿{selectedRoom.price.toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-4 sm:p-6 border-b border-slate-700">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-100 mb-3 sm:mb-4">รายละเอียดค่าใช้จ่ายประจำเดือน</h2>
+                <div className="p-4 sm:p-6 border-b border-slate-100">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">รายละเอียดค่าใช้จ่ายประจำเดือน</h2>
 
                   <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-900 rounded-lg">
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 rounded-lg">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-700 flex-shrink-0 shadow-sm">
                           <Icons.Home />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-slate-100">ค่าเช่าห้อง</p>
-                          <p className="text-xs text-slate-300">รายเดือน</p>
+                          <p className="font-bold text-sm sm:text-base text-slate-900">ค่าเช่าห้อง</p>
+                          <p className="text-xs text-slate-500">รายเดือน</p>
                         </div>
                       </div>
-                      <p className="text-base sm:text-lg font-bold text-slate-100 flex-shrink-0">฿{selectedRoom.price.toLocaleString()}</p>
+                      <p className="text-base sm:text-lg font-bold text-slate-900 flex-shrink-0">฿{selectedRoom.price.toLocaleString()}</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-900 rounded-lg">
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 rounded-lg">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-700 flex-shrink-0 shadow-sm">
                           <Icons.Droplet />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-slate-100">ค่าน้ำประปา</p>
-                          <p className="text-xs text-slate-300">เดือนนี้</p>
+                          <p className="font-bold text-sm sm:text-base text-slate-900">ค่าน้ำประปา</p>
+                          <p className="text-xs text-slate-500">เดือนนี้</p>
                         </div>
                       </div>
-                      <p className="text-base sm:text-lg font-bold text-slate-100 flex-shrink-0">฿{selectedRoom.waterBill.toLocaleString()}</p>
+                      <p className="text-base sm:text-lg font-bold text-slate-900 flex-shrink-0">฿{selectedRoom.waterBill.toLocaleString()}</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-900 rounded-lg">
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 rounded-lg">
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <div className="w-10 h-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center text-slate-700 flex-shrink-0 shadow-sm">
                           <Icons.Zap />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-slate-100">ค่าไฟฟ้า</p>
-                          <p className="text-xs text-slate-300">เดือนนี้</p>
+                          <p className="font-bold text-sm sm:text-base text-slate-900">ค่าไฟฟ้า</p>
+                          <p className="text-xs text-slate-500">เดือนนี้</p>
                         </div>
                       </div>
-                      <p className="text-base sm:text-lg font-bold text-slate-100 flex-shrink-0">฿{selectedRoom.electricBill.toLocaleString()}</p>
+                      <p className="text-base sm:text-lg font-bold text-slate-900 flex-shrink-0">฿{selectedRoom.electricBill.toLocaleString()}</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-900 rounded-lg border border-slate-700">
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-blue-100 shadow-sm">
                       <div>
-                        <p className="font-bold text-slate-100 text-base sm:text-lg">รวมทั้งหมด</p>
-                        <p className="text-xs text-slate-300">ค่าใช้จ่ายประจำเดือนนี้</p>
+                        <p className="font-bold text-blue-600 text-base sm:text-lg">รวมทั้งหมด</p>
+                        <p className="text-xs text-slate-500">ค่าใช้จ่ายประจำเดือนนี้</p>
                       </div>
-                      <p className="text-xl sm:text-2xl font-bold text-slate-100">
+                      <p className="text-xl sm:text-2xl font-black text-blue-600">
                         ฿{(selectedRoom.price + selectedRoom.waterBill + selectedRoom.electricBill).toLocaleString()}
                       </p>
                     </div>
@@ -674,19 +702,19 @@ export default function DormitoryManagement() {
                 </div>
 
                 {selectedRoom.outstandingBalance > 0 && (
-                  <div className="p-4 sm:p-6 border-b border-slate-700 bg-red-800">
+                  <div className="p-4 sm:p-6 border-b border-slate-100 bg-red-50">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white flex-shrink-0">
                         <Icons.AlertCircle />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm sm:text-base text-red-200 mb-1">ยอดค้างชำระ</h3>
-                        <p className="text-xs sm:text-sm text-red-300 mb-3">
+                        <h3 className="font-bold text-sm sm:text-base text-red-900 mb-1">ยอดค้างชำระ</h3>
+                        <p className="text-xs sm:text-sm text-red-700 mb-3">
                           มีค่าใช้จ่ายที่ค้างชำระจากเดือนก่อนหน้า
                         </p>
-                        <div className="bg-slate-900 rounded-lg p-3 sm:p-4 border border-red-700">
-                          <p className="text-xs sm:text-sm text-slate-300 mb-1">ยอดค้างชำระทั้งหมด</p>
-                          <p className="text-2xl sm:text-3xl font-bold text-red-300">
+                        <div className="bg-white rounded-lg p-3 sm:p-4 border border-red-200 shadow-sm">
+                          <p className="text-xs sm:text-sm text-slate-500 mb-1">ยอดค้างชำระทั้งหมด</p>
+                          <p className="text-2xl sm:text-3xl font-bold text-red-600">
                             ฿{selectedRoom.outstandingBalance.toLocaleString()}
                           </p>
                         </div>
@@ -695,8 +723,8 @@ export default function DormitoryManagement() {
                   </div>
                 )}
 
-                <div className="p-4 sm:p-6">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-100 mb-3 sm:mb-4">สถานะการชำระเงิน</h2>
+                <div className="p-4 sm:p-6 bg-white">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4">สถานะการชำระเงิน</h2>
 
                   {selectedRoom.paymentStatus === 'paid' && (
                     <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
@@ -704,7 +732,7 @@ export default function DormitoryManagement() {
                         <Icons.CheckCircle />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm sm:text-base text-green-900">ชำระเงินครบถ้วนแล้ว</p>
+                        <p className="font-bold text-sm sm:text-base text-green-900">ชำระเงินครบถ้วนแล้ว</p>
                         <p className="text-xs sm:text-sm text-green-700">ขอบคุณที่ชำระเงินตรงเวลา</p>
                       </div>
                     </div>
@@ -716,9 +744,9 @@ export default function DormitoryManagement() {
                         <Icons.Clock />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm sm:text-base text-yellow-900">รอการชำระเงิน</p>
+                        <p className="font-bold text-sm sm:text-base text-yellow-900">รอการชำระเงิน</p>
                         <p className="text-xs sm:text-sm text-yellow-700">กำหนดชำระภายในวันที่ {selectedRoom.dueDate}</p>
-                        <p className="text-xs sm:text-sm font-medium text-yellow-800 mt-2 break-words">
+                        <p className="text-xs sm:text-sm font-bold text-yellow-800 mt-2 break-words">
                           ยอดที่ต้องชำระ: ฿{(selectedRoom.price + selectedRoom.waterBill + selectedRoom.electricBill + selectedRoom.outstandingBalance).toLocaleString()}
                         </p>
                       </div>
@@ -731,9 +759,9 @@ export default function DormitoryManagement() {
                         <Icons.AlertCircle />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm sm:text-base text-red-900">เกินกำหนดชำระ</p>
+                        <p className="font-bold text-sm sm:text-base text-red-900">เกินกำหนดชำระ</p>
                         <p className="text-xs sm:text-sm text-red-700">เกินกำหนดชำระตั้งแต่วันที่ {selectedRoom.dueDate}</p>
-                        <p className="text-xs sm:text-sm font-medium text-red-800 mt-2 break-words">
+                        <p className="text-xs sm:text-sm font-bold text-red-800 mt-2 break-words">
                           ยอดที่ต้องชำระทันที: ฿{(selectedRoom.price + selectedRoom.waterBill + selectedRoom.electricBill + selectedRoom.outstandingBalance).toLocaleString()}
                         </p>
                       </div>
@@ -745,55 +773,49 @@ export default function DormitoryManagement() {
           )}
 
           {paymentModalOpen && paymentRoom && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-              <div className="w-full max-w-md bg-slate-800 rounded-lg border border-slate-700 p-6 text-slate-200">
-                <h3 className="text-lg font-bold mb-3">ชำระเงิน — ห้อง {paymentRoom.id}</h3>
-                <div className="space-y-2 mb-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+              <div className="w-full max-w-md bg-white rounded-2xl p-6 text-slate-900 shadow-2xl">
+                <h3 className="text-xl font-bold mb-4 text-slate-900">ชำระเงิน — ห้อง {paymentRoom.id}</h3>
+                <div className="space-y-3 mb-6 bg-slate-50 p-4 rounded-xl">
                   <div className="flex justify-between text-sm">
-                    <span>ค่าเช่าห้อง</span>
-                    <span>฿{paymentRoom.price.toLocaleString()}</span>
+                    <span className="text-slate-600">ค่าเช่าห้อง</span>
+                    <span className="font-bold">฿{paymentRoom.price.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>ค่าน้ำ</span>
-                    <span>฿{paymentRoom.waterBill.toLocaleString()}</span>
+                    <span className="text-slate-600">ค่าน้ำ</span>
+                    <span className="font-bold">฿{paymentRoom.waterBill.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>ค่าไฟ</span>
-                    <span>฿{paymentRoom.electricBill.toLocaleString()}</span>
+                    <span className="text-slate-600">ค่าไฟ</span>
+                    <span className="font-bold">฿{paymentRoom.electricBill.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-bold pt-2 border-t border-slate-700">
-                    <span>รวม</span>
+                  <div className="flex justify-between text-lg font-bold pt-3 border-t border-slate-200 text-blue-600">
+                    <span>รวมทั้งสิ้น</span>
                     <span>฿{(paymentRoom.price + paymentRoom.waterBill + paymentRoom.electricBill).toLocaleString()}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-center mb-4">
-                  <div className="w-40 h-40 bg-slate-700 rounded-md overflow-hidden flex items-center justify-center">
-                    {/*
-                      ถ้ามี preview จากการอัปโหลดให้แสดง preview,
-                      ถ้าไม่มีก็แสดงไฟล์ /QR.jpg (วางไฟล์ QR.jpg ในโฟลเดอร์ public)
-                    */}
-                    {typeof window !== 'undefined' && ( /* protection for SSR */ true) && (
-                      <>
-                        {/* ถ้ามี qrPreview state ให้ใช้ (โค้ด qrPreview อยู่ก่อนหน้าในไฟล์) */}
-                        {/* ...existing qrPreview logic... */}
-                        {/* ถ้าไม่มี preview ให้แสดง /QR.jpg */}
-                        <img src="/QR.jpg" alt="QR Code" className="w-full h-full object-contain" />
-                      </>
-                    )}
+                <div className="flex justify-center mb-6">
+                  <div className="w-48 h-48 bg-white border border-slate-200 p-2 rounded-xl shadow-inner flex items-center justify-center relative">
+                    <Image
+                      src="/QR.jpg"
+                      alt="QR Code"
+                      fill
+                      className="object-contain p-2"
+                    />
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
-                    onClick={() => { /* trigger payment flow if needed */ closePaymentModal(); }}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md"
+                    onClick={handleConfirmPayment}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-green-600/20 transition-all active:scale-[0.98] uppercase tracking-wider"
                   >
-                    ยืนยันการชำระ
+                    ยืนยันการชำระเงิน
                   </button>
                   <button
                     onClick={closePaymentModal}
-                    className="px-4 py-2 border border-slate-700 rounded-md text-slate-200"
+                    className="px-6 py-4 border border-slate-200 rounded-2xl text-slate-500 hover:bg-slate-50 font-bold transition-all"
                   >
                     ยกเลิก
                   </button>

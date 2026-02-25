@@ -126,7 +126,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Orbs */}
             <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
             <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
@@ -150,20 +150,20 @@ export default function RegisterPage() {
                     </div>
                 )}
 
-                <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
+                <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-2xl">
                     <button
                         onClick={() => router.push('/login')}
-                        className="flex items-center gap-2 text-slate-500 hover:text-slate-300 mb-8 transition-colors group"
+                        className="flex items-center gap-2 text-slate-500 hover:text-slate-700 mb-8 transition-colors group"
                     >
-                        <div className="p-2 rounded-lg bg-slate-800 group-hover:bg-slate-700 transition-colors">
+                        <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-slate-200 transition-colors">
                             <Icons.ArrowLeft />
                         </div>
                         <span className="text-sm font-medium">กลับไปเข้าสู่ระบบ</span>
                     </button>
 
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-2">สมัครสมาชิก</h2>
-                        <p className="text-sm text-slate-400">สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งานระบบจัดการหอพัก</p>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-2">สมัครสมาชิก</h2>
+                        <p className="text-sm text-slate-500">สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งานระบบจัดการหอพัก</p>
                     </div>
 
                     <form onSubmit={handleRegister} className="space-y-4">
@@ -181,7 +181,7 @@ export default function RegisterPage() {
                                         value={registerForm.name}
                                         onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
                                         disabled={loading}
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                                     />
                                 </div>
                             </div>
@@ -199,7 +199,7 @@ export default function RegisterPage() {
                                         value={registerForm.phone}
                                         onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
                                         disabled={loading}
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                                     />
                                 </div>
                             </div>
@@ -218,7 +218,7 @@ export default function RegisterPage() {
                                     value={registerForm.email}
                                     onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                                     disabled={loading}
-                                    className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -237,13 +237,13 @@ export default function RegisterPage() {
                                         value={registerForm.password}
                                         onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
                                         disabled={loading}
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         disabled={loading}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
                                     >
                                         {showPassword ? <Icons.Eye /> : <Icons.EyeOff />}
                                     </button>
@@ -263,7 +263,7 @@ export default function RegisterPage() {
                                         value={registerForm.confirmPassword}
                                         onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
                                         disabled={loading}
-                                        className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
+                                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all disabled:opacity-50"
                                     />
                                 </div>
                             </div>
@@ -272,12 +272,12 @@ export default function RegisterPage() {
                         <label className="flex items-start gap-3 text-sm pt-2 cursor-pointer group">
                             <div className="relative flex items-center mt-0.5">
                                 <input type="checkbox" className="peer sr-only" required />
-                                <div className="w-5 h-5 bg-slate-800 border border-slate-700 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all"></div>
+                                <div className="w-5 h-5 bg-white border border-slate-200 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all"></div>
                                 <div className="absolute inset-0 flex items-center justify-center text-white scale-0 peer-checked:scale-100 transition-transform">
                                     <Icons.Check />
                                 </div>
                             </div>
-                            <span className="text-slate-400 group-hover:text-slate-300 transition-colors">ฉันยอมรับ <button type="button" className="text-blue-500 hover:underline">เงื่อนไขการใช้งาน</button> และ <button type="button" className="text-blue-500 hover:underline">นโยบายความเป็นส่วนตัว</button></span>
+                            <span className="text-slate-500 group-hover:text-slate-700 transition-colors">ฉันยอมรับ <button type="button" className="text-blue-600 hover:underline">เงื่อนไขการใช้งาน</button> และ <button type="button" className="text-blue-600 hover:underline">นโยบายความเป็นส่วนตัว</button></span>
                         </label>
 
                         <button

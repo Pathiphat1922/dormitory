@@ -106,7 +106,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
@@ -114,51 +114,57 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-md relative z-10">
         {successMessage && (
-          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-in">
-            <Icons.Check />
-            <span className="text-sm text-green-300">{successMessage}</span>
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <Icons.Check />
+            </div>
+            <span className="text-sm font-bold text-green-800">{successMessage}</span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="mb-4 p-4 bg-red-600/20 border border-red-500/50 rounded-lg flex items-center gap-3 animate-in">
-            <Icons.Check />
-            <span className="text-sm text-red-300">{errorMessage}</span>
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <Icons.Check />
+            </div>
+            <span className="text-sm font-bold text-red-800">{errorMessage}</span>
           </div>
         )}
 
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
           <button
             onClick={handleBackToLogin}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 mb-6 transition"
+            className="flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-6 transition-colors group"
           >
-            <Icons.ArrowLeft />
-            <span className="text-sm font-medium">กลับไปเข้าสู่ระบบ</span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+              <Icons.ArrowLeft />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-wider">กลับไปเข้าสู่ระบบ</span>
           </button>
 
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">สมัครสมาชิก</h2>
-            <p className="text-sm text-slate-400">สร้างบัญชีใหม่เพื่อใช้งาน</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">สมัครสมาชิก</h2>
+            <p className="text-slate-500">สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งานระบบ</p>
           </div>
 
           <div className="space-y-4 mb-6">
             {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">ชื่อ-นามสกุล</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">ชื่อ-นามสกุล</label>
               <input
                 type="text"
                 placeholder="สมชาย ใจดี"
                 value={registerForm.name}
                 onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
               />
             </div>
 
             {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">อีเมล</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">อีเมล</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Mail />
                 </div>
                 <input
@@ -166,28 +172,28 @@ export default function RegisterPage() {
                   placeholder="example@email.com"
                   value={registerForm.email}
                   onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
               </div>
             </div>
 
             {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">เบอร์โทรศัพท์</label>
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">เบอร์โทรศัพท์</label>
               <input
                 type="tel"
                 placeholder="081-234-5678"
                 value={registerForm.phone}
                 onChange={(e) => setRegisterForm({ ...registerForm, phone: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
               />
             </div>
 
             {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">รหัสผ่าน</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">รหัสผ่าน</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Lock />
                 </div>
                 <input
@@ -195,11 +201,12 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={registerForm.password}
                   onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
                 <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <Icons.Eye /> : <Icons.EyeOff />}
                 </button>
@@ -207,10 +214,10 @@ export default function RegisterPage() {
             </div>
 
             {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">ยืนยันรหัสผ่าน</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">ยืนยันรหัสผ่าน</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Lock />
                 </div>
                 <input
@@ -218,28 +225,31 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={registerForm.confirmPassword}
                   onChange={(e) => setRegisterForm({ ...registerForm, confirmPassword: e.target.value })}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
                 <button
+                  type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showConfirmPassword ? <Icons.Eye /> : <Icons.EyeOff />}
                 </button>
               </div>
             </div>
 
-            <label className="flex items-start gap-2 text-sm">
-              <input type="checkbox" className="w-4 h-4 rounded bg-slate-700 border-slate-600 mt-0.5" />
-              <span className="text-slate-300">ฉันยินยอมตามนโยบายและเงื่อนไขการใช้งาน</span>
+            <label className="flex items-start gap-2 text-sm cursor-pointer group py-2">
+              <input type="checkbox" className="w-5 h-5 rounded-lg bg-slate-50 border-slate-200 text-blue-600 mt-0.5 focus:ring-blue-500/20" />
+              <span className="text-slate-600 group-hover:text-slate-900 transition-colors leading-relaxed">
+                ฉันยินยอมตาม <a href="#" className="text-blue-600 font-bold hover:underline">นโยบายแความเป็นส่วนตัว</a> และ <a href="#" className="text-blue-600 font-bold hover:underline">เงื่อนไขการใช้งาน</a>
+              </span>
             </label>
 
             <button
               onClick={handleRegister}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
-              {loading ? 'กำลังประมวลผล...' : 'สมัครสมาชิก'}
+              {loading ? 'กำลังประมวลผล...' : 'สมัครสมาชิกใหม่'}
             </button>
           </div>
         </div>

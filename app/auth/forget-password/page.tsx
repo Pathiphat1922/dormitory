@@ -52,7 +52,7 @@ export default function ForgetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
@@ -62,31 +62,35 @@ export default function ForgetPasswordPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Success Message */}
         {successMessage && (
-          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-in">
-            <Icons.Check />
-            <span className="text-sm text-green-300">{successMessage}</span>
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <Icons.Check />
+            </div>
+            <span className="text-sm font-bold text-green-800">{successMessage}</span>
           </div>
         )}
 
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
           <button
             onClick={handleBackToLogin}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 mb-6 transition"
+            className="flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-6 transition-colors group"
           >
-            <Icons.ArrowLeft />
-            <span className="text-sm font-medium">กลับไปเข้าสู่ระบบ</span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+              <Icons.ArrowLeft />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-wider">กลับไปเข้าสู่ระบบ</span>
           </button>
 
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">ลืมรหัสผ่าน</h2>
-            <p className="text-sm text-slate-400">ใส่อีเมลของคุณเพื่อรับลิงค์รีเซ็ตรหัสผ่าน</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">ลืมรหัสผ่าน</h2>
+            <p className="text-slate-500 text-sm">ใส่อีเมลของคุณเพื่อรับลิงค์รีเซ็ตรหัสผ่าน</p>
           </div>
 
           <div className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">อีเมล</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">อีเมลแอดเดรส</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Mail />
                 </div>
                 <input
@@ -94,27 +98,27 @@ export default function ForgetPasswordPage() {
                   placeholder="admin@example.com"
                   value={forgetForm.email}
                   onChange={(e) => setForgetForm({ ...forgetForm, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-2">เราจะส่งลิงค์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณ</p>
+              <p className="text-xs text-slate-400 mt-2 px-1">เราจะส่งลิงค์สำหรับการตั้งรหัสผ่านใหม่ไปยังอีเมลที่ระบุข้างต้น</p>
             </div>
 
             <button
               onClick={handleForgetPassword}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
-              {loading ? 'กำลังประมวลผล...' : 'ส่งลิงค์รีเซ็ต'}
+              {loading ? 'กำลังประมวลผล...' : 'ส่งลิงค์การตั้งค่ารหัสผ่านใหม่'}
             </button>
           </div>
 
-          <div className="p-4 bg-slate-700/30 border border-slate-600 rounded-lg text-center">
-            <p className="text-xs text-slate-300">
-              ไม่ได้รับอีเมล? ลองตรวจสอบโฟลเดอร์ spam หรือ{' '}
+          <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+            <p className="text-xs text-slate-500">
+              ไม่ได้รับอีเมล? โปรดตรวจสอบในจดหมายขยะ (spam) หรือ{' '}
               <button
                 onClick={handleGoToRegister}
-                className="text-blue-400 hover:text-blue-300 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-bold"
               >
                 สมัครสมาชิกใหม่
               </button>

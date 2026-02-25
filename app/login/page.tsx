@@ -102,12 +102,12 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-slate-200 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Orbs */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
 
-            <div className="w-full max-w-md relative z-10 transition-all duration-500 hover:scale-[1.01]">
+            <div className="w-full max-w-md relative z-10">
                 {successMessage && (
                     <div className="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/50 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -126,18 +126,18 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+                <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
                     <div className="flex flex-col items-center mb-8">
                         <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 mb-4 transition-transform hover:rotate-6">
                             <Icons.Home />
                         </div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">ระบบจัดการหอพัก</h1>
+                        <h1 className="text-3xl font-bold text-slate-900">ระบบจัดการหอพัก</h1>
                         <p className="text-sm text-slate-500 mt-1">Dormitory Management System</p>
                     </div>
 
                     <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-white">เข้าสู่ระบบ</h2>
-                        <p className="text-sm text-slate-400">ยินดีต้อนรับกลับมา กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
+                        <h2 className="text-xl font-semibold text-slate-900">เข้าสู่ระบบ</h2>
+                        <p className="text-sm text-slate-500">ยินดีต้อนรับกลับมา กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-5">
@@ -153,7 +153,7 @@ export default function LoginPage() {
                                     value={loginForm.email}
                                     onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                                     disabled={loading}
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -170,7 +170,7 @@ export default function LoginPage() {
                                     value={loginForm.password}
                                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                                     disabled={loading}
-                                    className="w-full pl-12 pr-12 py-3.5 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
+                                    className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
                                 />
                                 <button
                                     type="button"
@@ -191,12 +191,12 @@ export default function LoginPage() {
                                         className="peer sr-only"
                                         disabled={loading}
                                     />
-                                    <div className="w-5 h-5 bg-slate-800 border border-slate-700 rounded-md peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all"></div>
+                                    <div className="w-5 h-5 bg-white border border-slate-200 rounded-md peer-checked:bg-blue-600 peer-checked:border-blue-600 transition-all"></div>
                                     <div className="absolute inset-0 flex items-center justify-center text-white scale-0 peer-checked:scale-100 transition-transform">
                                         <Icons.Check />
                                     </div>
                                 </div>
-                                <span className="text-slate-400 group-hover:text-slate-300 transition-colors">จดจำฉันไว้</span>
+                                <span className="text-slate-500 group-hover:text-slate-700 transition-colors">จดจำฉันไว้</span>
                             </label>
                             <button
                                 type="button"
@@ -231,13 +231,13 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    <div className="mt-8 pt-6 border-t border-slate-800 text-center">
+                    <div className="mt-8 pt-6 border-t border-slate-100 text-center">
                         <p className="text-sm text-slate-500">
                             ยังไม่มีบัญชี?{' '}
                             <button
                                 type="button"
                                 onClick={() => router.push('/register')}
-                                className="text-blue-500 hover:text-blue-400 font-bold transition-colors"
+                                className="text-blue-600 hover:text-blue-500 font-bold transition-colors"
                             >
                                 สมัครสมาชิกใหม่
                             </button>
@@ -247,9 +247,9 @@ export default function LoginPage() {
 
                 {/* Demo Credentials */}
                 <div className="mt-6 flex justify-center">
-                    <div className="px-4 py-2 bg-slate-900/50 backdrop-blur border border-slate-800 rounded-full">
-                        <p className="text-xs text-slate-400">
-                            💡 <strong className="text-slate-300">ทดสอบ:</strong> admin@email.com / adminforever
+                    <div className="px-4 py-2 bg-white/50 backdrop-blur border border-slate-200 rounded-full">
+                        <p className="text-xs text-slate-500">
+                            💡 <strong className="text-slate-600">ทดสอบ:</strong> admin@email.com / adminforever
                         </p>
                     </div>
                 </div>

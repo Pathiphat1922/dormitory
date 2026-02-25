@@ -111,7 +111,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
@@ -119,57 +119,61 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         {successMessage && (
-          <div className="mb-4 p-4 bg-green-600/20 border border-green-500/50 rounded-lg flex items-center gap-3 animate-pulse">
-            <Icons.Check />
-            <span className="text-sm text-green-300">{successMessage}</span>
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <Icons.Check />
+            </div>
+            <span className="text-sm font-bold text-green-800">{successMessage}</span>
           </div>
         )}
 
         {errorMessage && (
-          <div className="mb-4 p-4 bg-red-600/20 border border-red-500/50 rounded-lg flex items-center gap-3">
-            <Icons.AlertCircle />
-            <span className="text-sm text-red-300">{errorMessage}</span>
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+              <Icons.AlertCircle />
+            </div>
+            <span className="text-sm font-bold text-red-800">{errorMessage}</span>
           </div>
         )}
 
-        <div className="bg-slate-800/80 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white">
+            <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
               <Icons.Home />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-100">ระบบจัดการหอพัก</h1>
-              <p className="text-xs text-slate-400">Dormitory Management</p>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">ระบบจัดการหอพัก</h1>
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">Dormitory Management</p>
             </div>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-slate-100 mb-2">เข้าสู่ระบบ</h2>
-            <p className="text-sm text-slate-400">ยินดีต้อนรับกลับมา</p>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">เข้าสู่ระบบ</h2>
+            <p className="text-slate-500">ยินดีต้อนรับกลับมา กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">ชื่อผู้ใช้</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <form onSubmit={handleLogin} className="space-y-5 mb-8">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">ชื่อผู้ใช้</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Mail />
                 </div>
                 <input
                   type="text"
-                  placeholder="admin"
+                  placeholder="กรอกชื่อผู้ใช้หรืออีเมล"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">รหัสผ่าน</label>
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">รหัสผ่าน</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Icons.Lock />
                 </div>
                 <input
@@ -178,13 +182,13 @@ export default function LoginPage() {
                   value={loginForm.password}
                   onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                   disabled={loading}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:opacity-50"
+                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 disabled:opacity-50"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
                   aria-label="toggle password"
                 >
                   {showPassword ? <Icons.Eye /> : <Icons.EyeOff />}
@@ -192,20 +196,20 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded bg-slate-700 border-slate-600" 
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 rounded-lg bg-slate-50 border-slate-200 text-blue-600 focus:ring-blue-500/20 transition-all"
                   disabled={loading}
                 />
-                <span className="text-slate-300">จำไว้ในที่นี้</span>
+                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">จำไว้ในระบบ</span>
               </label>
               <button
                 type="button"
                 onClick={handleGoToForgetPassword}
                 disabled={loading}
-                className="text-blue-400 hover:text-blue-300 font-medium transition disabled:opacity-50"
+                className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
               >
                 ลืมรหัสผ่าน?
               </button>
@@ -214,7 +218,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -230,21 +234,22 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="text-center text-sm">
-            <span className="text-slate-400">ยังไม่มีบัญชี? </span>
+          <div className="text-center">
+            <p className="text-slate-500 text-sm mb-4">ยังไม่มีบัญชีผู้ใช้?</p>
             <button
               type="button"
               onClick={handleGoToRegister}
               disabled={loading}
-              className="text-blue-400 hover:text-blue-300 font-semibold transition disabled:opacity-50"
+              className="w-full py-3.5 border border-slate-200 rounded-2xl text-slate-700 font-bold hover:bg-slate-50 transition-all disabled:opacity-50"
             >
-              สมัครสมาชิก
+              สมัครสมาชิกใหม่
             </button>
           </div>
 
-          <div className="mt-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-            <p className="text-xs text-blue-300 text-center">
-              💡 <strong>ทดสอบ:</strong> admin@email.com / adminforever
+          <div className="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+            <p className="text-xs text-blue-800 text-center flex items-center justify-center gap-2 font-medium">
+              <span className="flex h-2 w-2 rounded-full bg-blue-600"></span>
+              <strong>ทดลองใช้:</strong> admin@email.com / adminforever
             </p>
           </div>
         </div>
